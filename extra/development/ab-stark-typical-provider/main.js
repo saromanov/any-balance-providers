@@ -15,13 +15,13 @@ var g_headers = {
 
 function main() {
 	var prefs = AnyBalance.getPreferences();
-	var baseurl = 'https://kabinet.xxxxxx.ru/';
+	var baseurl = 'http://bananawars.ru/index.php';
 	AnyBalance.setDefaultCharset('utf-8');
 	
 	checkEmpty(prefs.login, 'Введите логин!');
 	checkEmpty(prefs.password, 'Введите пароль!');
 	
-	var html = AnyBalance.requestGet(baseurl + 'login', g_headers);
+	var html = AnyBalance.requestGet(baseurl, g_headers);
 	
 	if(!html || AnyBalance.getLastStatusCode() > 400){
 		AnyBalance.trace(html);
@@ -37,11 +37,11 @@ function main() {
 		return value;
 	});
 	
-	html = AnyBalance.requestPost(baseurl + 'login', {
+	html = AnyBalance.requestPost(baseurl, {
 		login: prefs.login,
 		password: prefs.password,
 		'Remember': 'false'
-	}, addHeaders({Referer: baseurl + 'login'}));
+	}, addHeaders({Referer: baseurl}));
 	
 	if (!/logout/i.test(html)) {
 		var error = getParam(html, null, null, /<div[^>]+class="t-error"[^>]*>[\s\S]*?<ul[^>]*>([\s\S]*?)<\/ul>/i, replaceTagsAndSpaces);
@@ -54,13 +54,11 @@ function main() {
 	
 	var result = {success: true};
 	
-	getParam(html, result, 'balance', /баланс:(?:[^>]*>){1}([\s\S]*?)<\//i, replaceTagsAndSpaces, parseBalance);
-	getParam(html, result, ['currency', 'balance'], /Текущий баланс:[\s\S]*?<b[^>]*>([\s\S]*?)<\/b>/i, replaceTagsAndSpaces, parseCurrency);
-	getParam(html, result, 'fio', /Имя абонента:(?:[\s\S]*?<b[^>]*>){1}([\s\S]*?)<\/b>/i, replaceTagsAndSpaces);
-	getParam(html, result, '__tariff', /Тарифный план:[\s\S]*?<b[^>]*>([\s\S]*?)<\/b>/i, replaceTagsAndSpaces);
-	getParam(html, result, 'phone', /Номер:[\s\S]*?<b[^>]*>([\s\S]*?)<\/b>/i, replaceTagsAndSpaces);
-	getParam(html, result, 'deadline', /Действителен до:[\s\S]*?<b[^>]*>([\s\S]*?)<\/b>/i, replaceTagsAndSpaces, parseDate);
-	getParam(html, result, 'status', /Статус:[\s\S]*?<b[^>]*>([\s\S]*?)<\/b>/i, replaceTagsAndSpaces);
+	getParam(html, result, 'level', /Уровень:[\s\S]*?(\d+)<\/a>/i, replaceTagsAndSpaces);
+	getParam(html, result, 'boosters', /Бустеры:[\s\S]*?(\d+)<\/span>/i, replaceTagsAndSpaces);
+	getParam(html, result, 'money', /Деньги:[\s\S]*?(\d+)<\/span>/i, replaceTagsAndSpaces);
+	getParam(html, result, 'mail', /Почта:[\s\S]*?(\d+)<\/a>/i, replaceTagsAndSpaces);
+	getParam(html, result, 'scores', /Очки:[\s\S]*?(\d+)<\/a>/i,replaceTagsAndSpaces);
 	
 	AnyBalance.setResult(result);
 }
