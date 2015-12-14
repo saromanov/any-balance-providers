@@ -44,9 +44,9 @@ function main() {
 	}, addHeaders({Referer: baseurl}));
 	
 	if (!/logout/i.test(html)) {
-		var error = getParam(html, null, null, /<div[^>]+class="t-error"[^>]*>[\s\S]*?<ul[^>]*>([\s\S]*?)<\/ul>/i, replaceTagsAndSpaces);
+		var error = getParam(html, null, null, /error.gif[\s\S]*?<td>\s(\W+)<\/td>/i, replaceTagsAndSpaces);
 		if (error)
-			throw new AnyBalance.Error(error, null, /Неверный логин или пароль/i.test(error));
+			throw new AnyBalance.Error(error, null, /Введите логин и пароль/i.test(error));
 		
 		AnyBalance.trace(html);
 		throw new AnyBalance.Error('Не удалось зайти в личный кабинет. Сайт изменен?');
@@ -54,11 +54,11 @@ function main() {
 	
 	var result = {success: true};
 	
-	getParam(html, result, 'level', /Уровень:[\s\S]*?(\d+)<\/a>/i, replaceTagsAndSpaces);
-	getParam(html, result, 'boosters', /Бустеры:[\s\S]*?(\d+)<\/span>/i, replaceTagsAndSpaces);
-	getParam(html, result, 'money', /Деньги:[\s\S]*?(\d+)<\/span>/i, replaceTagsAndSpaces);
-	getParam(html, result, 'mail', /Почта:[\s\S]*?(\d+)<\/a>/i, replaceTagsAndSpaces);
-	getParam(html, result, 'scores', /Очки:[\s\S]*?(\d+)<\/a>/i,replaceTagsAndSpaces);
+	getParam(html, result, 'level', /Уровень:[\s\S]*?(\d+)<\/a>/i, replaceTagsAndSpaces, parseBalance);
+	getParam(html, result, 'boosters', /Бустеры:[\s\S]*?(\d+)<\/span>/i, replaceTagsAndSpaces, parseBalance);
+	getParam(html, result, 'money', /Деньги:[\s\S]*?(\d+)<\/span>/i, replaceTagsAndSpaces, parseBalance);
+	getParam(html, result, 'mail', /Почта:[\s\S]*?(\d+)<\/a>/i, replaceTagsAndSpaces, parseBalance);
+	getParam(html, result, 'scores', /Очки:[\s\S]*?(\d+)<\/a>/i,replaceTagsAndSpaces, parseBalance);
 	
 	AnyBalance.setResult(result);
 }
